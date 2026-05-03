@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Match the Shadow</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #fff3cd;
+}
+
+h1 {
+    color: purple;
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+img {
+    width: 120px;
+}
+
+.draggable {
+    cursor: grab;
+}
+
+.dropzone {
+    width: 130px;
+    height: 130px;
+    border: 3px dashed #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.correct {
+    border: 3px solid green;
+}
+
+.wrong {
+    border: 3px solid red;
+}
+
+.feedback {
+    position: absolute;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.correctMark {
+    color: green;
+}
+
+.wrongMark {
+    color: red;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Find the Correct Shadow</h1>
+
+<button onclick="speak()">🔊 Instructions</button>
+
+<!-- Background Music -->
+<audio id="bg" autoplay loop>
+<source src="https://www.bensound.com/bensound-music/bensound-funnysong.mp3">
+</audio>
+
+<!-- Sounds -->
+<audio id="clap" src="https://www.soundjay.com/human/applause-8.mp3"></audio>
+<audio id="wrongSound" src="https://www.soundjay.com/button/beep-10.mp3"></audio>
+
+<div class="container">
+
+<!-- LEFT -->
+<div class="column">
+<img src="girl1.png" class="draggable" draggable="true" id="drag1" data-match="1">
+<img src="boy1.png" class="draggable" draggable="true" id="drag2" data-match="2">
+<img src="singer1.png" class="draggable" draggable="true" id="drag3" data-match="3">
+<img src="skipping1.png" class="draggable" draggable="true" id="drag4" data-match="4">
+</div>
+
+<!-- RIGHT -->
+<div class="column">
+
+<div class="dropzone" data-match="3">
+<img src="shadow3.png">
+</div>
+
+<div class="dropzone" data-match="1">
+<img src="shadow1.png">
+</div>
+
+<div class="dropzone" data-match="4">
+<img src="shadow4.png">
+</div>
+
+<div class="dropzone" data-match="2">
+<img src="shadow2.png">
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function speak() {
+    let msg = new SpeechSynthesisUtterance(
+        "Drag each picture and match it with the correct shadow."
+    );
+    speechSynthesis.speak(msg);
+}
+
+let draggables = document.querySelectorAll(".draggable");
+let dropzones = document.querySelectorAll(".dropzone");
+
+draggables.forEach(item => {
+    item.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("match", item.dataset.match);
+        e.dataTransfer.setData("id", item.id);
+    });
+});
+
+dropzones.forEach(zone => {
+
+    zone.addEventListener("dragover", e => e.preventDefault());
+
+    zone.addEventListener("drop", e => {
+        e.preventDefault();
+
+        let draggedMatch = e.dataTransfer.getData("match");
+        let draggedId = e.dataTransfer.getData("id");
+
+        // Remove old feedback
+        let old = zone.querySelector(".feedback");
+        if(old) old.remove();
+
+        if (zone.dataset.match === draggedMatch) {
+
+            // Correct
+            document.getElementById("clap").play();
+
+            let dragged = document.getElementById(draggedId);
+            zone.innerHTML = "";
+            zone.appendChild(dragged);
+
+            let tick = document.createElement("div");
+            tick.innerHTML = "✔";
+            tick.className = "feedback correctMark";
+            zone.appendChild(tick);
+
+        } else {
+
+            // Wrong
+            document.getElementById("wrongSound").play();
+
+            let cross = document.createElement("div");
+            cross.innerHTML = "✖";
+            cross.className = "feedback wrongMark";
+            zone.appendChild(cross);
+
+            setTimeout(() => {
+                cross.remove();
+            }, 800);
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>
